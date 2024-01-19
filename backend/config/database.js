@@ -1,13 +1,11 @@
-import mongoose from "mongoose";
+const mongoose = require('mongoose');
+const MONGO_URI = process.env.MONGO_URI;
 
 const connectDatabase = () => {
-    mongoose .connect(process.env.DB_URI, {
-      })
-      .then((data) => {
-        console.log(`Mongodb connected with server: ${data.connection.host}`);
-      }).catch((err)=>{
-            console.log(err)
-      });
-  };
-  
-  export default connectDatabase;
+    mongoose.connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+        .then(() => {
+            console.log("Mongoose Connected");
+        });
+}
+
+module.exports = connectDatabase;

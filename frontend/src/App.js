@@ -1,196 +1,247 @@
-import "./App.css";
-import { useEffect, useState } from "react"; 
-import Header from "./component/layout/Header/Header.js";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import WebFont from "webfontloader";
-import React from "react";
-import Footer from "./component/layout/Footer/Footer";
-import Home from "./component/Home/Home";
-import ProductDetails from "./component/Product/ProductDetails";
-import Products from "./component/Product/Products";
-import Search from "./component/Product/Search";
-import LoginSignUp from "./component/User/LoginSignUp";
-import store from "./store";
-import { loadUser } from "./actions/userAction";
-import UserOptions from "./component/layout/Header/UserOptions";
-import { useSelector } from "react-redux";
-// import Profile from "./component/User/Profile";
-import ProtectedRoute from "./component/Route/ProtectedRoute";
-// import UpdateProfile from "./component/User/UpdateProfile";
-// import UpdatePassword from "./component/User/UpdatePassword";
-import ForgotPassword from "./component/User/ForgotPassword";
-import ResetPassword from "./component/User/ResetPassword";
-import Cart from "./component/Cart/Cart";
-// import Shipping from "./component/Cart/Shipping";
-// import ConfirmOrder from "./component/Cart/ConfirmOrder";
-import axios from "axios";
-import Payment from "./component/Cart/Payment";
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-// import OrderSuccess from "./component/Cart/OrderSuccess";
-// import MyOrders from "./component/Order/MyOrders";
-// import OrderDetails from "./component/Order/OrderDetails";
-// import Dashboard from "./component/Admin/Dashboard.js";
-// import ProductList from "./component/Admin/ProductList.js";
-// import NewProduct from "./component/Admin/NewProduct";
-// import UpdateProduct from "./component/Admin/UpdateProduct";
-// import OrderList from "./component/Admin/OrderList";
-// import ProcessOrder from "./component/Admin/ProcessOrder";
-// import UsersList from "./component/Admin/UsersList";
-// import UpdateUser from "./component/Admin/UpdateUser";
-// import ProductReviews from "./component/Admin/ProductReviews";
-import Contact from "./component/layout/Contact/Contact";
-import About from "./component/layout/About/About";
-import NotFound from "./component/layout/Not Found/NotFound";
+import WebFont from 'webfontloader';
+import Footer from './components/Layouts/Footer/Footer';
+import Header from './components/Layouts/Header/Header';
+import Login from './components/User/Login';
+import Register from './components/User/Register';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { loadUser } from './actions/userAction';
+import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
+import UpdateProfile from './components/User/UpdateProfile';
+import UpdatePassword from './components/User/UpdatePassword';
+import ForgotPassword from './components/User/ForgotPassword';
+import ResetPassword from './components/User/ResetPassword';
+import Account from './components/User/Account';
+import ProtectedRoute from './Routes/ProtectedRoute';
+import Home from './components/Home/Home';
+import ProductDetails from './components/ProductDetails/ProductDetails';
+import Products from './components/Products/Products';
+import Cart from './components/Cart/Cart';
+import Shipping from './components/Cart/Shipping';
+import OrderConfirm from './components/Cart/OrderConfirm';
+import Payment from './components/Cart/Payment';
+import OrderStatus from './components/Cart/OrderStatus';
+import OrderSuccess from './components/Cart/OrderSuccess';
+import MyOrders from './components/Order/MyOrders';
+import OrderDetails from './components/Order/OrderDetails';
+import Dashboard from './components/Admin/Dashboard';
+import MainData from './components/Admin/MainData';
+import OrderTable from './components/Admin/OrderTable';
+import UpdateOrder from './components/Admin/UpdateOrder';
+import ProductTable from './components/Admin/ProductTable';
+import NewProduct from './components/Admin/NewProduct';
+import UpdateProduct from './components/Admin/UpdateProduct';
+import UserTable from './components/Admin/UserTable';
+import UpdateUser from './components/Admin/UpdateUser';
+import ReviewsTable from './components/Admin/ReviewsTable';
+import Wishlist from './components/Wishlist/Wishlist';
+import NotFound from './components/NotFound';
 
 function App() {
-  const { isAuthenticated, user } = useSelector((state) => state.user);
 
-  const [stripeApiKey, setStripeApiKey] = useState("");
+  const dispatch = useDispatch();
+  const { pathname } = useLocation();
+  // const [stripeApiKey, setStripeApiKey] = useState("");
 
-  async function getStripeApiKey() {
-    const { data } = await axios.get("/api/v1/stripeapikey");
-
-    setStripeApiKey(data.stripeApiKey);
-  }
+  // async function getStripeApiKey() {
+  //   const { data } = await axios.get('/api/v1/stripeapikey');
+  //   setStripeApiKey(data.stripeApiKey);
+  // }
 
   useEffect(() => {
     WebFont.load({
       google: {
-        families: ["Roboto", "Droid Sans", "Chilanka"],
+        families: ["Roboto:300,400,500,600,700"]
       },
     });
+  });
 
-    store.dispatch(loadUser());
+  useEffect(() => {
+    dispatch(loadUser());
+    // getStripeApiKey();
+  }, [dispatch]);
 
-    getStripeApiKey();
-  }, []);
+  // always scroll to top on route/path change
+  useEffect(() => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth"
+    });
+  }, [pathname])
 
+  // disable right click
   window.addEventListener("contextmenu", (e) => e.preventDefault());
-
+  window.addEventListener("keydown", (e) => {
+    if (e.keyCode == 123) e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && e.keyCode === 73) e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && e.keyCode === 74) e.preventDefault();
+  });
+  
   return (
-
-    <Router>
+    <>
       <Header />
-      {/* <h1> Hello World</h1> */}
-
-      {isAuthenticated && <UserOptions user={user} />}
-
-      {stripeApiKey && (
-        <Elements stripe={loadStripe(stripeApiKey)}>
-          <ProtectedRoute exact path="/process/payment" component={Payment} />
-        </Elements>
-      )}
-
       <Routes>
-        
-        <Route exact path="/" component={Home} /> 
-        <Route exact path="/product/:id" component={ProductDetails} />
-        <Route exact path="/products" component={Products} />
-        <Route path="/products/:keyword" component={Products} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-        <Route exact path="/search" component={Search} />
+        <Route path="/product/:id" element={<ProductDetails />} />
+        <Route path="/products" element={<Products />} />
+        <Route path="/products/:keyword" element={<Products />} />
 
-        <Route exact path="/contact" component={Contact} />
+        <Route path="/cart" element={<Cart />} />
 
-        <Route exact path="/about" component={About} />
+        {/* order process */}
+        <Route path="/shipping" element={
+          <ProtectedRoute>
+            <Shipping />
+          </ProtectedRoute>
+        } ></Route>
 
-        {/* <ProtectedRoute exact path="/account" component={Profile} />
+        <Route path="/order/confirm" element={
+          <ProtectedRoute>
+            <OrderConfirm />
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute exact path="/me/update" component={UpdateProfile} />
+        <Route path="/process/payment" element={
+          <ProtectedRoute>
+            {/* // stripeApiKey && ( */}
+            {/* // <Elements stripe={loadStripe(stripeApiKey)}> */}
+            <Payment />
+            {/* // </Elements> */}
+            {/* ) */}
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          exact
-          path="/password/update"
-          component={UpdatePassword}
-        /> */}
+        <Route path="/orders/success" element={<OrderSuccess success={true} />} />
+        <Route path="/orders/failed" element={<OrderSuccess success={false} />} />
+        {/* order process */}
 
-        <Route exact path="/password/forgot" component={ForgotPassword} />
+        <Route path="/order/:id" element={
+          <ProtectedRoute>
+            <OrderStatus />
+          </ProtectedRoute>
+        } ></Route>
 
-        <Route exact path="/password/reset/:token" component={ResetPassword} />
+        <Route path="/orders" element={
+          <ProtectedRoute>
+            <MyOrders />
+          </ProtectedRoute>
+        }></Route>
 
-        <Route exact path="/login" component={LoginSignUp} />
+        <Route path="/order_details/:id" element={
+          <ProtectedRoute>
+            <OrderDetails />
+          </ProtectedRoute>
+        }></Route>
 
-        <Route exact path="/cart" component={Cart} />
+        <Route path="/account" element={
+          <ProtectedRoute>
+            <Account />
+          </ProtectedRoute>
+        } ></Route>
 
-        {/* <ProtectedRoute exact path="/shipping" component={Shipping} />
+        <Route path="/account/update" element={
+          <ProtectedRoute>
+            <UpdateProfile />
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute exact path="/success" component={OrderSuccess} />
+        <Route path="/password/update" element={
+          <ProtectedRoute>
+            <UpdatePassword />
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute exact path="/orders" component={MyOrders} />
+        <Route path="/password/forgot" element={<ForgotPassword />} />
 
-        <ProtectedRoute exact path="/order/confirm" component={ConfirmOrder} />
+        <Route path="/password/reset/:token" element={<ResetPassword />} />
 
-        <ProtectedRoute exact path="/order/:id" component={OrderDetails} />
+        <Route path="/wishlist" element={
+          <ProtectedRoute>
+            <Wishlist />
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          isAdmin={true}
-          exact
-          path="/admin/dashboard"
-          component={Dashboard}
-        />
-        <ProtectedRoute
-          exact
-          path="/admin/products"
-          isAdmin={true}
-          component={ProductList}
-        />
-        <ProtectedRoute
-          exact
-          path="/admin/product"
-          isAdmin={true}
-          component={NewProduct}
-        />
+        <Route path="/admin/dashboard" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={0}>
+              <MainData />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          exact
-          path="/admin/product/:id"
-          isAdmin={true}
-          component={UpdateProduct}
-        />
-        <ProtectedRoute
-          exact
-          path="/admin/orders"
-          isAdmin={true}
-          component={OrderList}
-        />
+        <Route path="/admin/orders" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={1}>
+              <OrderTable />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          exact
-          path="/admin/order/:id"
-          isAdmin={true}
-          component={ProcessOrder}
-        />
-        <ProtectedRoute
-          exact
-          path="/admin/users"
-          isAdmin={true}
-          component={UsersList}
-        />
+        <Route path="/admin/order/:id" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={1}>
+              <UpdateOrder />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          exact
-          path="/admin/user/:id"
-          isAdmin={true}
-          component={UpdateUser}
-        />
+        <Route path="/admin/products" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={2}>
+              <ProductTable />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
 
-        <ProtectedRoute
-          exact
-          path="/admin/reviews"
-          isAdmin={true}
-          component={ProductReviews}
-        /> */}
+        <Route path="/admin/new_product" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={3}>
+              <NewProduct />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
 
-        <Route
-          component={
-            window.location.pathname === "/process/payment" ? null : NotFound
-          }
-        />
+        <Route path="/admin/product/:id" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={2}>
+              <UpdateProduct />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
+
+        <Route path="/admin/users" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={4}>
+              <UserTable />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
+
+        <Route path="/admin/user/:id" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={4}>
+              <UpdateUser />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
+
+        <Route path="/admin/reviews" element={
+          <ProtectedRoute isAdmin={true}>
+            <Dashboard activeTab={5}>
+              <ReviewsTable />
+            </Dashboard>
+          </ProtectedRoute>
+        } ></Route>
+
+        <Route path="*" element={<NotFound />}></Route>
+
       </Routes>
-
       <Footer />
-    </Router>
+    </>
   );
 }
 

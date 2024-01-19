@@ -1,50 +1,47 @@
-import express from "express";
-const app = express();
+const express = require('express');
+const path = require('path');
+const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const fileUpload = require('express-fileupload');
+const errorMiddleware = require('./middlewares/error');
 
-import cookieParser  from "cookie-parser"
-import bodyParser  from "body-parser"
-import fileUpload  from "express-fileupload"
-import dotenv from "dotenv"
-import path  from "path"
-// import { dirname } from 'path';
+const app = express(); 
 
-
-import errorMiddleware from "./middleware/error.js"
-
-// // Config
-if (process.env.NODE_ENV !== "PRODUCTION") {
-  dotenv.config({ path: "backend/config/config.env" });
-}
+// config
+if (process.env.NODE_ENV !== 'production') {
+    require('dotenv').config({ path: 'backend/config/config.env' }); 
+} 
 
 app.use(express.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(fileUpload());
 
-// // Route Imports
-import product  from "./routes/productRoute.js"
-import user from "./routes/userRoute.js"
-import order from "./routes/orderRoute.js"
-import payment from "./routes/paymentRoute.js"
+const user = require('./routes/userRoute');
+const product = require('./routes/productRoute');
+const order = require('./routes/orderRoute');
+const payment = require('./routes/paymentRoute');
 
-app.use("/api/v1", product); 
-app.use("/api/v1", user);
-app.use("/api/v1", order);
-app.use("/api/v1", payment);
+app.use('/api/v1', user);
+app.use('/api/v1', product);
+app.use('/api/v1', order);
+app.use('/api/v1', payment);
 
- 
-const __dirname = path.resolve();
-const frontendBuildPath = path.join(__dirname, '../frontend/build');
-app.use(express.static(frontendBuildPath));
+// deployment
+__dirname = path.resolve();
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '/frontend/build')))
 
-// app.use(express.static(path.join(__dirname, "../frontend/build")));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'))
+    });
+} else {
+    app.get('/', (req, res) => {
+        res.send('Server is Running! 🚀');
+    });
+}
 
-app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../frontend/build/index.html'));
-});
-
-
-// Middleware for Errors
+// error middleware
 app.use(errorMiddleware);
 
-export default app; 
+module.exports = app;

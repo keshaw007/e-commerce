@@ -1,47 +1,25 @@
-import express from "express"
+const express = require('express');
+const { getAllProducts, getProductDetails, updateProduct, deleteProduct, getProductReviews, deleteReview, createProductReview, createProduct, getAdminProducts, getProducts } = require('../controllers/productController');
+const { isAuthenticatedUser, authorizeRoles } = require('../middlewares/auth');
 
-import {
-  getAllProducts, 
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  getProductDetails,
-  createProductReview,
-  getProductReviews,
-  deleteReview,
-  getAdminProducts,
-} from "../controllers/productController.js"
+const router = express.Router();
 
-import { isAuthenticatedUser, authorizeRoles } from"../middleware/auth.js"
+router.route('/products').get(getAllProducts);
+router.route('/products/all').get(getProducts);
 
-const router = express.Router(); 
+router.route('/admin/products').get(isAuthenticatedUser, authorizeRoles("admin"), getAdminProducts);
+router.route('/admin/product/new').post(isAuthenticatedUser, authorizeRoles("admin"), createProduct);
 
-// Get all products 
-router.route("/products").get(getAllProducts);
+router.route('/admin/product/:id')
+    .put(isAuthenticatedUser, authorizeRoles("admin"), updateProduct)
+    .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteProduct);
 
-router
-  .route("/admin/products")
-  .get(isAuthenticatedUser, authorizeRoles("admin"), getAdminProducts);
+router.route('/product/:id').get(getProductDetails);
 
-// Create product 
-router
-  .route("/admin/product/new")
-  .post(isAuthenticatedUser, authorizeRoles("admin"), createProduct);
+router.route('/review').put(isAuthenticatedUser, createProductReview);
 
-// Update product and Delete Product
-router
-  .route("/admin/product/:id")
-  .put(isAuthenticatedUser, authorizeRoles("admin"), updateProduct)
-  .delete(isAuthenticatedUser, authorizeRoles("admin"), deleteProduct);
+router.route('/admin/reviews')
+    .get(getProductReviews)
+    .delete(isAuthenticatedUser, deleteReview);
 
-// Get Product Details 
-router.route("/product/:id").get(getProductDetails);
-
-router.route("/review").put(isAuthenticatedUser, createProductReview);
-
-router
-  .route("/reviews")
-  .get(getProductReviews)
-  .delete(isAuthenticatedUser, deleteReview);
-
-export default router;
+module.exports = router;
